@@ -4,35 +4,10 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import Blog from '../model/blogModel.js';
 import Category from '../model/categoryModel.js'; // Ensure you have a category model
+import { getCategory } from './categoryController.js';
 
 dotenv.config();
 
-export const adminAdd = async(req,res)=>{
-    try {
-        const {username,email,password,role} = req.body
-        if(!username || !email || !password || !role){
-            return res.status(400).json({ message: 'All fields are required' });
-        }
-
-        const admin = await User.findOne({ email });
-        if (admin) {
-            return res.status(400).json({ message: 'Admin already exists' });
-        }
-        const hashedPassword = await bcrypt.hash('adminPassword', 10);
-        const newAdmin = new User({
-            username: username,
-            email: email,
-            password:hashedPassword,
-            role: 'admin',
-        });
-
-        await newAdmin.save();
-        return res.status(201).json({ message: 'Admin added successfully' });
-    } catch (error) {
-        console.error('Error in adminAdd:', error);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
-}
 
 
 
@@ -129,6 +104,13 @@ export const deleteBlog = async(req,res)=>{
         const blog = await Blog.findByIdAndDelete(id);
         if (!blog) {
             return res.status(404).json({ message: 'Blog not found' });
+        }
+
+        const category = await Category.findOne({ blogs: blog._id });
+        console.log("category",category);
+        if (category) {
+            category.blogs.pull(blog._id);
+            await category.save();
         }
         return res.status(200).json({ message: 'Blog deleted successfully' });
     } catch (error) {

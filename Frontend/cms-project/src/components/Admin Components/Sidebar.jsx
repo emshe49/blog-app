@@ -9,10 +9,10 @@ const Sidebar = () => {
   const backendLink = useSelector((state)=>state.prod.link)
   const links = [
     { name: "Dashboard", path: "/admin-dashboard" },
-    { name: "Add Blogs", path: "/admin-dashboard/add-blogs" },
+    { name: "Add Blog & Category", path: "/admin-dashboard/add-blogs" },
     { name: "Edit Blogs", path: "/admin-dashboard/edit-blogs" },
     {name: "Categories", path: "/admin-dashboard/delete-category"},
-    {name: "Users", path: "/admin-dashboard/users"},
+    
   ];
 
   const handleLogout = async()=>{

@@ -15,7 +15,7 @@ const Categories = () => {
       toast.success(response.data.message);
       getAllCategory();
     } catch (err) {
-      console.error(err);
+      toast.error(err.response.data.message);
     }
   };
   

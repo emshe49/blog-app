@@ -62,9 +62,10 @@ const AddBlog = () => {
         { withCredentials: true }
       );
       toast.success(response.data.message);
+      
       setCategory(""); // Clear category input after submission
     } catch (err) {
-      console.log(err);
+      toast.error(err.response.data.message);
     }
   };
 

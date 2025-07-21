@@ -54,7 +54,7 @@ export const loginUser = async (req, res) => {
         // Set cookie and send response
         res.cookie('EssaRaza', token, {
             httpOnly: true,
-            secure: false,
+            secure: true,
             sameSite: 'None',
             maxAge: 10000 * 60 * 60, // 1 hour
         });
@@ -159,21 +159,12 @@ export const changeAvatar = async (req, res) => {
 
 
 
-export const googleAuth = (req, res, next) => {
-    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
-};
-
-export const googleAuthCallback = (req, res) => {
-    // Handle success and redirect to frontend
-    const token = jwt.sign({ userId: req.user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    // Set cookie and redirect to frontend
-    res.cookie('EssaRaza', token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'None',
-        maxAge: 10000 * 60 * 60, // 1 hour
-    });
-
-    res.redirect('http://localhost:5173'); // Adjust the redirect URL as needed
-};
+export const getAllUser =async (req, res) => {
+    try {
+        const users =await User.find();
+        res.status(200).json({ users });
+    } catch (error) {
+        console.error('Error in getAllUser:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}

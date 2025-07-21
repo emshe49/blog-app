@@ -67,7 +67,7 @@ const App = () => {
             <Route path="/admin-dashboard/edit-blogs" element={<EditBlogs />} />
             <Route path="/admin-dashboard/update-blogs/:id" element={<UpdateBlog />} />
             <Route path="/admin-dashboard/delete-category" element={<DeleteCategory/>}/>
-            <Route path="/admin-dashboard/users" element={<AddAdmin />} />
+           
           </Route>
         </Route>
         <Route path="*" element={<UserNotFound />} />
