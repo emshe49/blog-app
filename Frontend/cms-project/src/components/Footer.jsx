@@ -69,7 +69,7 @@ const Footer = () => {
             <ul className="space-y-2 text-gray-400">
               {categories && categories.map((category) => (
                 <li key={category._id}>
-                  <Link to={`/cat/${category._id}`} onClick={()=>navigate(screenTop)} className="hover:text-white transition-colors">
+                  <Link to={`/cat/${category._id}`} onScroll={()=>navigate(screenTop)} className="hover:text-white transition-colors">
                     {category.title} {/* Assuming each category has a 'name' property */}
                   </Link>
                 </li>
@@ -83,11 +83,11 @@ const Footer = () => {
             <div className="space-y-3 text-gray-400">
               <div className="flex items-center space-x-3">
                 <FaEnvelope />
-                <span>contact@tcmblogger.com</span>
+                <span>zk074909@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <FaPhone />
-                <span>+1 (555) 123-4567</span>
+                <span>03189764318</span>
               </div>
             </div>
             <div className="pt-4">
