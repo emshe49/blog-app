@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import adminRoutes from './Routes/adminRoutes.js';
 import categoryRoutes from './Routes/categoryRoutes.js';
 import blogRoutes from './Routes/blogRoutes.js';
+import contactRoutes from './Routes/contactRoutes.js';
 import passport from 'passport';
 import session from 'express-session'; // Import express-session
 
@@ -18,10 +19,21 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    return callback(null, true); // Allow configured origins
+  },
+  credentials: true,
 }));
 
 app.use(express.json());
@@ -55,6 +67,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/blog', blogRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Start the server
 app.listen(process.env.PORT, () => {

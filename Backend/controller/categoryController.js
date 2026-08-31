@@ -75,19 +75,24 @@ export const deleteCategory = async (req, res) => {
 }
 
 
-export const updateCategory  =async ()=>{
-  try{
-    const {id} = req.params
-    const {title} = req.body
-    const category = Category.findByIdAndUpdate(id,{title},{new:true})
-    res.status(200).json({
+export const updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+    const category = await Category.findByIdAndUpdate(id, { title }, { new: true });
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+    return res.status(200).json({
       success: true,
+      message: "Category updated successfully",
       category,
     });
-
-  }catch(err){
-    console.log(err)
-
+  } catch (err) {
+    console.error("Error in updateCategory:", err);
+    return res.status(500).json({ message: "Internal server error" });
   }
-
-}
+};

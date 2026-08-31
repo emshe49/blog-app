@@ -85,13 +85,14 @@ export const chekCookie = (req, res) => {
 
 
 
-export const getUserData  = async (req, res) => {
-    try{
-    const {user} = req;
-    
-    res.status(200).json({ user });
-    }
-    catch (error) {
+export const getUserData = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .select('-password')
+            .populate('favoritesBlog');
+
+        res.status(200).json({ user });
+    } catch (error) {
         console.error('Error in getUserData:', error);
         return res.status(500).json({ message: 'Internal server error' });
     }

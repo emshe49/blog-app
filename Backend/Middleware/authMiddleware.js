@@ -5,42 +5,35 @@ const authMiddleware = {
   verifyToken: async (req, res, next) => {
     const token = req.cookies.EssaRaza;
     if (!token) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized. Please sign in." });
     }
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.userId);
       
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: "User not found." });
       }
       req.user = user; // Attach user to request
       next();
     } catch (error) {
-      return res.status(401).json({ message: "Invalid token" });
+      return res.status(401).json({ message: "Invalid or expired session. Please sign in again." });
     }
   },
   
-  authorizeRole: (role) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      console.log(req.user)
-      console.log("User not found in request."); // Debugging log
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  authorizeRole: (...roles) => {
+    return (req, res, next) => {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
 
-    console.log("User role:", req.user.role); // Debugging log
-    console.log("Required role:", role); // Debugging log
-
-    if (req.user.role !== role) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
-    next();
-  };
-},
+      const flatRoles = roles.flat();
+      if (flatRoles.length > 0 && !flatRoles.includes(req.user.role)) {
+        return res.status(403).json({ message: "Access forbidden: insufficient permissions." });
+      }
+      next();
+    };
+  },
 };
 
 export default authMiddleware;
-
-
-

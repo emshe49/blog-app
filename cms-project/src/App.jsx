@@ -9,6 +9,8 @@ import OtherLayout from "./layout/OtherLayout";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import AllBlogs from "./pages/AllBlogs";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import DashboardProfile from "./components/DashboardProfile";
 import Favourites from "./components/Favourites";
@@ -25,6 +27,7 @@ import UserNotFound from "./pages/UserNotFound";
 import { ToastContainer, toast } from 'react-toastify';
 import DeleteCategory from "./components/Admin Components/DeleteCategory";
 import AddAdmin from "./components/Admin Components/AddAdmin";
+import ContactMessages from "./components/Admin Components/ContactMessages";
 
 const App = () => {
   const backendLink = useSelector((state) => state.prod.link);
@@ -49,6 +52,8 @@ const App = () => {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="/all-blogs" element={<AllBlogs />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/description/:id" element={<Description/>} />
           <Route path="/cat/:id" element={<Categories />} />
           <Route path="/profile" element={<Profile />}>
@@ -67,7 +72,8 @@ const App = () => {
             <Route path="/admin-dashboard/edit-blogs" element={<EditBlogs />} />
             <Route path="/admin-dashboard/update-blogs/:id" element={<UpdateBlog />} />
             <Route path="/admin-dashboard/delete-category" element={<DeleteCategory/>}/>
-           
+            <Route path="/admin-dashboard/add-admin" element={<AddAdmin />} />
+            <Route path="/admin-dashboard/messages" element={<ContactMessages />} />
           </Route>
         </Route>
         <Route path="*" element={<UserNotFound />} />

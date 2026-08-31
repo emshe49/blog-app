@@ -21,6 +21,10 @@ export const loginAdmin = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
+        if (user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied: Admin privileges required' });
+        }
+
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -30,14 +34,39 @@ export const loginAdmin = async (req, res) => {
 
         res.cookie('EssaRaza', token, {
             httpOnly: true,
-            secure:true, // Set to true if using HTTPS
+            secure: true, // Set to true if using HTTPS
             sameSite: 'None',
             maxAge: 1000 * 60 * 60, // 1 hour
         });
 
-        return res.status(200).json({ message: 'Login successful' });
+        return res.status(200).json({ message: 'Admin login successful', user });
     } catch (error) {
         console.error('Error in loginAdmin:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const addAdmin = async (req, res) => {
+    try {
+        const { username, email, password, role } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User with this email already exists' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+            username: username || email.split('@')[0],
+            email,
+            password: hashedPassword,
+            role: role || 'admin',
+        });
+        await newUser.save();
+        return res.status(201).json({ message: 'User created successfully', user: newUser });
+    } catch (error) {
+        console.error('Error in addAdmin:', error);
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
