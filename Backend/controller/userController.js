@@ -10,8 +10,8 @@ export const registerUser = async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        if (!username || !email || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
         }
 
         const existingUser = await User.findOne({ email });
@@ -20,8 +20,9 @@ export const registerUser = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const userDisplayName = username || email.split('@')[0];
         const newUser = new User({
-            username,
+            username: userDisplayName,
             email,
             password: hashedPassword
         });

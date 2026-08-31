@@ -3,8 +3,9 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
   username: {
     type: String,
-    required: true,
-    unique: true,
+    default: function () {
+      return this.email ? this.email.split('@')[0] : '';
+    },
   },
   email: {
     type: String,
