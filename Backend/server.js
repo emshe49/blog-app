@@ -56,9 +56,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Connect to Database
-connectDB();
-
 // Routes
 app.get('/', (req, res) => {
     res.send('Hello');
@@ -70,6 +67,13 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/contact', contactRoutes);
 
 // Start the server
-app.listen(process.env.PORT, () => {
-    console.log(`Server is running at http://localhost:${process.env.PORT}`);
-});
+try {
+    await connectDB();
+    app.listen(process.env.PORT, () => {
+        console.log(`Server is running at http://localhost:${process.env.PORT}`);
+    });
+} catch (error) {
+    const message = error.message.replace(/mongodb(?:\+srv)?:\/\/[^\s]+/g, '[redacted MongoDB URI]');
+    console.error(`Database connection failed: ${message}`);
+    process.exit(1);
+}
