@@ -12,45 +12,85 @@ import categoryRoutes from './Routes/categoryRoutes.js';
 import blogRoutes from './Routes/blogRoutes.js';
 import contactRoutes from './Routes/contactRoutes.js';
 import passport from 'passport';
-import session from 'express-session'; // Import express-session
-
+import session from 'express-session';
 
 dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
+// Trust reverse proxy (crucial for Render/HTTPS cookies)
+app.set('trust proxy', 1);
 
-app.use(cors({
+const parseOrigins = () => {
+  const envOrigins = (process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((url) => url.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+
+  return [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    ...envOrigins,
+  ];
+};
+
+const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, Postman)
+    // Allow non-browser requests (Postman, mobile apps, curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+
+    const origins = parseOrigins();
+    const normalizedOrigin = origin.trim().replace(/\/+$/, '');
+
+    // Allow configured origins, any vercel.app deployment, or development mode
+    const isExplicitlyAllowed = origins.includes(normalizedOrigin);
+    let isVercel = false;
+    try {
+      const hostname = new URL(origin).hostname;
+      isVercel = hostname === 'vercel.app' || hostname.endsWith('.vercel.app');
+    } catch {
+      isVercel = false;
+    }
+
+    if (isExplicitlyAllowed || isVercel || process.env.NODE_ENV !== 'production') {
       return callback(null, true);
     }
-    return callback(null, true); // Allow configured origins
+
+    console.warn(`[CORS] Blocked request from origin: ${origin}`);
+    return callback(new Error(`CORS policy blocked for origin: ${origin}`), false);
   },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+  ],
+  exposedHeaders: ['Set-Cookie'],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(path.resolve(), 'public')));
 app.use(expressLayouts);
 app.set('view engine', 'ejs');
-app.set('layout', 'layouts'); // Fixed typo from 'lauyout' to 'layout'
+app.set('layout', 'layouts');
 app.use(bodyParser.json());
 app.use(cookieParser());
 
 // Session middleware
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'default_session_secret',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production', sameSite: 'None' } // Adjust based on your needs
+    cookie: { secure: process.env.NODE_ENV === 'production', sameSite: 'None' }
 }));
 
 app.use(passport.initialize());
